@@ -98,9 +98,24 @@ class Catr():
         df.to_csv(os.path.join(os.getcwd(),model_name+'.csv'))
 
         return final_caption
+    
+    def evaluate_folder(self,folder_path, model_name):
+        for img in os.listdir(folder_path):
+            if img.endswith(('.png','.jpg','.jpeg')):
+                image_path = os.path.join(folder_path, img)
+                print('Processing : ', img)
+                self.evaluate(image_path, model_name)
+                
+    
 """
 if __name__ == '__main__':
     catr = Catr()
-    output = catr.evaluate('29.jpg','car')
+    # For Single Image
+    single_image_output = catr.evaluate('seed4365.png','car')
+    print(single_image_output)
+
+    # For Folder
+    catr.evaluate_folder( <img_folder_path> , model_name = 'car')
     print(output)
 """
+    

@@ -62,10 +62,36 @@ class Infer():
             img = self.G(z, self.label, truncation_psi=self.truncation_psi, noise_mode=self.noise_mode)
             img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
             PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{self.outdir}/seed{seed:04d}.png')
+            
+    def final_generation(self, seeds):
+        # print('<-----------------',seeds)
+        seeds = num_range(seeds)
+        # print('------------>',seeds)
+        # Generate images.
+        for seed_idx, seed in enumerate(seeds):
+            print('Generating image for seed %d (%d/%d) ...' % (seed, seed_idx, len(seeds)))
+            z = torch.from_numpy(np.random.RandomState(seed).randn(1, self.G.z_dim)).to(self.device)
+            img = self.G(z, self.label, truncation_psi=self.truncation_psi, noise_mode=self.noise_mode)
+            img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+            file_path = f'{self.outdir}/seed{seed:04d}.png'
+            PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(file_path)
+            file_name = f'seed{seed:04d}.png'
+#             s3_path = f"faces-models/{input_text_data.replace(' ', '_')}/{file_name}"
+#             with open (file_path, 'rb') as data:
+#                 self.bucket.put_object(Key=s3_path, Body=data) 
+            #os.remove(file_path)
 
+    
+    def consecutive_inference(self, start, end):
+        seeds = [i for i in range(start, end)]
+        print('---------------->>>>>>>>>>>',seeds)
+        self.final_generation(seeds)
+        
 #----------------------------------------------------------------------------
-
+#"""
 if __name__ == "__main__":
     inf = Infer(network_pkl='https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada/pretrained/ffhq.pkl',model_name='faces')
     inf.final_inference(seeds=[5,35,6,25])
+    inf.consecutive_inference(start=10, end=20)
+#"""
 #----------------------------------------------------------------------------
